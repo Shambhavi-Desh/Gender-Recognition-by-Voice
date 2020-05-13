@@ -19,6 +19,15 @@ for i=1:n % 30 millisecond of the frame and 10 millisecond of the overlapping
         recording(num_Samp*(i-1)+1:num_Samp*(i-1)+num_of_Samples);
     end
 end
+for i=1:n
+   auto(:,i) = xcorr(sample(:,i));%autocorrelation
+   [z, ind] = findpeaks(auto(:,i));%Finding the local maxima
+   sum_1(i) = mean(diff(ind));
+   %Finding the difference in the location of peaks
+end  
+period = max(sum_1);%Finding the period of the 
+fundamental = fs/period;%Finding the fundamental frequency
+end
 
 
 
