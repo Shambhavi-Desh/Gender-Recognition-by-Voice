@@ -1,0 +1,159 @@
+classdef dspproj < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                    matlab.ui.Figure
+        UIAxes                      matlab.ui.control.UIAxes
+        InputAudioLabel             matlab.ui.control.Label
+        ShowResultButton            matlab.ui.control.Button
+        ExitButton                  matlab.ui.control.Button
+        PlayAudioButton             matlab.ui.control.Button
+        TheSpeakerisEditFieldLabel  matlab.ui.control.Label
+        TheSpeakerisEditField       matlab.ui.control.EditField
+        DropDownLabel               matlab.ui.control.Label
+        DropDown                    matlab.ui.control.DropDown
+    end
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Value changed function: DropDown
+        function DropDownValueChanged(app, event)
+            value = app.DropDown.Value;
+            
+        end
+
+        % Button pushed function: ShowResultButton
+        function ShowResultButtonPushed(app, event)
+           
+            value = app.DropDown.Value;
+             filename = strcat('s',num2str(value),'.wav');
+             result = guioutput(filename);
+            app.TheSpeakerisEditField.Value = result;
+           [y,fs] = audioread(filename);
+             plot(app.UIAxes,y,'-b');
+        
+        end
+
+        % Button pushed function: ExitButton
+        function ExitButtonPushed(app, event)
+            closereq();
+        end
+
+        % Button pushed function: PlayAudioButton
+        function PlayAudioButtonPushed(app, event)
+            value = app.DropDown.Value;
+            filename = strcat('s',num2str(value),'.wav');
+            [y,fs] = audioread(filename);
+            player = audioplayer(y,fs)
+            
+                playblocking(player);
+               
+            
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 640 480];
+            app.UIFigure.Name = 'UI Figure';
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, 'Time Domain Representation of Input Signal')
+            xlabel(app.UIAxes, 'Time ')
+            ylabel(app.UIAxes, 'Amplitude')
+            app.UIAxes.PlotBoxAspectRatio = [1.50442477876106 1 1];
+            app.UIAxes.Position = [161 138 320 236];
+
+            % Create InputAudioLabel
+            app.InputAudioLabel = uilabel(app.UIFigure);
+            app.InputAudioLabel.HorizontalAlignment = 'center';
+            app.InputAudioLabel.FontWeight = 'bold';
+            app.InputAudioLabel.FontColor = [0 0.4471 0.7412];
+            app.InputAudioLabel.Position = [108 392 85 39];
+            app.InputAudioLabel.Text = {'Input Audio :'; ''};
+
+            % Create ShowResultButton
+            app.ShowResultButton = uibutton(app.UIFigure, 'push');
+            app.ShowResultButton.ButtonPushedFcn = createCallbackFcn(app, @ShowResultButtonPushed, true);
+            app.ShowResultButton.Position = [288 91 100 22];
+            app.ShowResultButton.Text = 'Show Result';
+
+            % Create ExitButton
+            app.ExitButton = uibutton(app.UIFigure, 'push');
+            app.ExitButton.ButtonPushedFcn = createCallbackFcn(app, @ExitButtonPushed, true);
+            app.ExitButton.Position = [593 9 32 22];
+            app.ExitButton.Text = 'Exit';
+
+            % Create PlayAudioButton
+            app.PlayAudioButton = uibutton(app.UIFigure, 'push');
+            app.PlayAudioButton.ButtonPushedFcn = createCallbackFcn(app, @PlayAudioButtonPushed, true);
+            app.PlayAudioButton.Position = [423 400 100 22];
+            app.PlayAudioButton.Text = 'Play Audio';
+
+            % Create TheSpeakerisEditFieldLabel
+            app.TheSpeakerisEditFieldLabel = uilabel(app.UIFigure);
+            app.TheSpeakerisEditFieldLabel.HorizontalAlignment = 'right';
+            app.TheSpeakerisEditFieldLabel.FontSize = 20;
+            app.TheSpeakerisEditFieldLabel.FontWeight = 'bold';
+            app.TheSpeakerisEditFieldLabel.FontColor = [0.851 0.3255 0.098];
+            app.TheSpeakerisEditFieldLabel.Position = [145 33 152 25];
+            app.TheSpeakerisEditFieldLabel.Text = 'The Speaker is ';
+
+            % Create TheSpeakerisEditField
+            app.TheSpeakerisEditField = uieditfield(app.UIFigure, 'text');
+            app.TheSpeakerisEditField.FontSize = 20;
+            app.TheSpeakerisEditField.FontWeight = 'bold';
+            app.TheSpeakerisEditField.FontColor = [0.851 0.3255 0.098];
+            app.TheSpeakerisEditField.Position = [312 30 200 28.2000007629395];
+
+            % Create DropDownLabel
+            app.DropDownLabel = uilabel(app.UIFigure);
+            app.DropDownLabel.HorizontalAlignment = 'right';
+            app.DropDownLabel.Position = [216 400 66 22];
+            app.DropDownLabel.Text = 'Drop Down';
+
+            % Create DropDown
+            app.DropDown = uidropdown(app.UIFigure);
+            app.DropDown.Items = {'9', '10', '11', '12'};
+            app.DropDown.ValueChangedFcn = createCallbackFcn(app, @DropDownValueChanged, true);
+            app.DropDown.Position = [297 400 100 22];
+            app.DropDown.Value = '9';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = dspproj
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
